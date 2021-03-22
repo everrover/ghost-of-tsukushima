@@ -62,6 +62,28 @@ const verifyUserPassword = async (username, email, password) => {
   return message( true, "Password valid for user: "+username, {user_id: user.user_id, email: user.email})
 }
 
+const changeUserPassword = async (user_id, oldPassword, newPassword) => {
+  if(!(user_id && oldPassword && newPassword)){
+    return message( false, "Password and user_id must be provided")
+  }
+
+  const user = await User.findOne({where: {user_id, is_active: true, is_registered: true}})
+    
+  if(!user){ return message( false, "Unable to find active and registered user: "+user_id) }
+  const passwordValid = await bcrypt.compareSync(oldPassword, user.password)
+  if(!passwordValid){ return message( false, "Old password invalid for user!!")}
+
+  const userAfterUpd = await user.update({
+    password: bcrypt.hashSync(newPassword, CONFIGS.SALT_ROUNDS_NUMBER)
+  })
+  
+  if(!userAfterUpd){
+    return message(false, "Unable to update password for user", )
+  }
+
+  return message( true, "Password changed for user: "+user_id)
+}
+
 const updateUser = async (user_id, username, email, role) => {
   if(!(user_id)){
     return message(false, "User ID must be provided!")
@@ -133,6 +155,7 @@ module.exports = {
   checkIfPresent: errorHandler(checkIfPresent),
   verifyUserRegistration: errorHandler(verifyUserRegistration),
   verifyUserPassword: errorHandler(verifyUserPassword),
+  changeUserPassword: errorHandler(changeUserPassword),
   deleteUser: errorHandler(deleteUser),
   updateUser: errorHandler(updateUser),
   findOneUser: errorHandler(findOneUser),

@@ -116,7 +116,11 @@ const validateExistingUserSigninToken = async (token) => {
   }
   const assUser = await findOneUser({user_id: decToken.body.user_id, email: decToken.body.email})
   
-  return assUser
+  if(!assUser && !assUser.status){
+    return message(false, "No userToken found")
+  }else{
+    return message(true, "Found userToken", {...assUser.body})
+  }
 }
 
 const findUserToken = async (token_id, token, user_id, type) => {

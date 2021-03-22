@@ -2,6 +2,7 @@
 const LOG = require("../utils/log.js")
 const { createUserProfile } = require('../handlers/profile')
 const { createUser, verifyUserRegistration, verifyUserPassword,
+   changeUserPassword,
    createUserRegistrationToken, validateToken, createSigninToken,
    checkIfPresent, findOneUser, findExistingSigninToken,
    deleteExistingUserSigninToken, validateExistingUserSigninToken
@@ -152,10 +153,36 @@ const validateUser = async (req, res, next) => {
 
 }
 
+const changePassword = async (req, res, next) => {
+  const token = req.headers.authorization
+  if(!token){
+    LOG.info("[changePassword] who the fuck is he/she!!")
+    return res.status(400).send(message(false, "who the fuck is he/she!!"))
+  }
+  const {old_password, new_password} = req.body
+  if(old_password === new_password){
+    LOG.info("[changePassword] Old and new password are same.")
+    return res.status(200).send(message(true, "Old and new password must be different"))
+  }
+  LOG.info('[changePassword] req received. params: ', "Token-is-a-secret", "Old-and-new-passwords-are-secret-too") 
+
+  const validateTokenResponse = await validateExistingUserSigninToken(token)
+  LOG.info('[changePassword] change user password response rcv. Response: ', validateTokenResponse)
+  if( !validateTokenResponse || !validateTokenResponse.status ){ return res.status(500).send(validateTokenResponse) }
+
+  const changePasswordResponse = await changeUserPassword(validateTokenResponse.body.user_id, old_password, new_password)
+  LOG.info('[changePassword] changed user password. Response: ', changePasswordResponse)
+
+  if( !validateTokenResponse || !validateTokenResponse.status ){ return res.status(500).send(changePasswordResponse) }
+  return res.status(200).send(message(true, "User password changed!"))
+
+}
+
 module.exports = {
   signin: errorHandlerMiddleware(signin), 
   signout: errorHandlerMiddleware(signout), 
   signup: errorHandlerMiddleware(signup), 
-  validateUser: errorHandlerMiddleware(validateUser), 
+  changePassword: errorHandlerMiddleware(changePassword), 
+  validateUser: errorHandlerMiddleware(validateUser),
   verifyUserAccount: errorHandlerMiddleware(verifyUserAccount)
 }

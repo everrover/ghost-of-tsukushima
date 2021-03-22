@@ -23,6 +23,10 @@ const generateUserOTP = (sequelize) => {
     attempt_count: {
       type: Sequelize.INTEGER,
       defaultValue: 0,
+    },
+    ttl: {
+      type: Sequelize.INTEGER,
+      defaultValue: 0,
     }
   })
 

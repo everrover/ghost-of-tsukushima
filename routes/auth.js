@@ -1,7 +1,7 @@
 const express = require('express')
 
 const {
-  signin, signout, signup, validateUser, verifyUserAccount
+  signin, signout, signup, validateUser, verifyUserAccount, changePassword
 } = require("../controllers/auth.js")
 
 const router = express.Router()
@@ -20,8 +20,12 @@ router.put('/user/verify-user', verifyUserAccount)
 router.post('/user/signin', signin)
 router.put('/user/signout', signout)
 router.get('/user/me', validateUser)
+router.post('/user/change-password', changePassword)
+
 router.get('/user/forgot-password', validateUser)
 router.get('/user/reset-password', validateUser)
+router.get('/user/resend-otp', validateUser)
+router.get('/user/verify-otp', validateUser)
 
 /**
   Sign up via external connections : google, github, fb
