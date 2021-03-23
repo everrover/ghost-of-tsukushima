@@ -117,12 +117,14 @@ const signin = async (req, res, next) => {
 
   const user_id = verificationResponse.body.user_id
   const user_email = verificationResponse.body.email
+  const user_username = verificationResponse.body.username
+  const role = verificationResponse.body.role
 
   const oldUserToken = await findExistingSigninToken(user_id)
   LOG.info("[Signin] Old user login token response", oldUserToken)
   if(oldUserToken && oldUserToken.status){ return res.status(200).send(oldUserToken) }    
 
-  const signinToken = await createSigninToken(user_id, user_email)
+  const signinToken = await createSigninToken(user_id, user_email, user_username, role)
   LOG.info("[Signin] Token creation response", signinToken)
 
   if( signinToken && signinToken.status ){ return res.status(200).send(message(true, "User sign in complete", {token: signinToken.body.token, expiration_time: signinToken.body.expiration_time})) }
@@ -149,6 +151,18 @@ const validateUser = async (req, res, next) => {
   LOG.info('[validateUser] validate user token response rcv. Response: ', validateTokenResponse)
 
   if( validateTokenResponse.status ){ return res.status(200).send(validateTokenResponse) }    
+  else{ return res.status(500).send(validateTokenResponse) }
+
+}
+
+const getUserRole = async (req, res, next) => {
+  const token = req.headers.authorization
+  LOG.info('[getUserRole] req received. params: ', "Token-is-a-secret") 
+
+  const validateTokenResponse = await validateExistingUserSigninToken(token)
+  LOG.info('[getUserRole] validate user token response rcv. Response: ', validateTokenResponse)
+
+  if( validateTokenResponse.status ){ return res.status(200).send(message(true, "Role fetched", {role: validateTokenResponse.body.role})) }    
   else{ return res.status(500).send(validateTokenResponse) }
 
 }
@@ -184,5 +198,6 @@ module.exports = {
   signup: errorHandlerMiddleware(signup), 
   changePassword: errorHandlerMiddleware(changePassword), 
   validateUser: errorHandlerMiddleware(validateUser),
-  verifyUserAccount: errorHandlerMiddleware(verifyUserAccount)
+  verifyUserAccount: errorHandlerMiddleware(verifyUserAccount),
+  getUserRole: errorHandlerMiddleware(getUserRole)
 }

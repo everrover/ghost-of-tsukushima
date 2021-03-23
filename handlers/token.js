@@ -17,10 +17,10 @@ const createUserToken = async (token, type, issued_time, ttl, expiration_time, u
   }
 }
 
-const createSigninToken = async (user_id, email) => {
+const createSigninToken = async (user_id, email, username, role) => {
   const accSigninToken = jwt.sign({
-    user_id: user_id,
-    email: email
+    user_id ,email,
+    username, role
   }, configs.secretKey, {expiresIn: configs.SIGNED_IN_TOKEN_TTL})
 
   const now = Date.now()

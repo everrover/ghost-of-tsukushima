@@ -1,7 +1,7 @@
 const express = require('express')
 
 const {
-  signin, signout, signup, validateUser, verifyUserAccount, changePassword
+  signin, signout, signup, validateUser, verifyUserAccount, changePassword, getUserRole
 } = require("../controllers/auth.js")
 
 const router = express.Router()
@@ -19,8 +19,10 @@ router.post('/user/create-user', signup)
 router.put('/user/verify-user', verifyUserAccount)
 router.post('/user/signin', signin)
 router.put('/user/signout', signout)
-router.get('/user/me', validateUser)
+router.get('/user/get-me', validateUser)
+router.get('/user/get-role', getUserRole)
 router.post('/user/change-password', changePassword)
+// router.delete('user/delete-account', deleteAccount) // need password, written-passphrase, otp verification, token, and recupe mechanism with ttl of 3 months
 
 router.get('/user/forgot-password', validateUser)
 router.get('/user/reset-password', validateUser)

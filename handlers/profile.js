@@ -17,7 +17,7 @@ const createUserProfile = async ({name, profile_photo, nationality, bg_photo, do
   }
 }
 
-const updateUserProfile = async (name, profile_photo, nationality, bg_photo, dob, gender, user_id, profile_id) => {
+const updateUserProfile = async ({name, profile_photo, nationality, bg_photo, dob, gender, user_id, profile_id}) => {
   if(!(profile_id)){
     return message(false, "profile_id must be present")
   }
@@ -41,7 +41,7 @@ const updateUserProfile = async (name, profile_photo, nationality, bg_photo, dob
 
 // no need for deletion
 
-const findUserProfile = async (user_id, profile_id) => {
+const findUserProfile = async ({user_id, profile_id}) => {
   if(!(user_id || profile_id)){
     return message(false, "user_id or email or username must be provided for find op")
   }
@@ -54,7 +54,7 @@ const findUserProfile = async (user_id, profile_id) => {
   }
 }
 
-const findAll = async (name, nationality, dob, gender) => {
+const findAll = async ({name, nationality, dob, gender}) => {
   if(!(name || nationality || dob || gender)){
     return message(false, "some field for search must be provided")
   }
