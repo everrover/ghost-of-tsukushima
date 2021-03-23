@@ -16,6 +16,7 @@ const DB = require("./models/dbConnect")
 // import routes
 const auth = require("./routes/auth")
 const file = require("./routes/file")
+const user = require("./routes/user")
 
 // Initialize DB
 const initDBConnection = async () =>{ await DB.connectDB(false) }
@@ -36,6 +37,7 @@ app.use(bodyParser.urlencoded({ extended: true })) // parse content-type - appli
 
 // mount routers
 app.use("/api/v1/auth", auth)
+app.use("/api/v1/user", user)
 app.use("/api/v1/file", file)
 
 // start server

@@ -1,14 +1,22 @@
 const express = require('express')
 
 const {
-  checkPresence
+  checkPresence, getMe
 } = require("../controllers/user.js")
 
 const router = express.Router()
 
+
+router.get('/me/bg', checkPresence)
+router.get('/me/profile-photo', checkPresence)
+router.post('/me/bg', checkPresence)
+router.post('/me/profile-photo', checkPresence)
+router.delete('/me/bg', checkPresence)
+router.delete('/me/profile-photo', checkPresence)
+
 router.get('/check-presence', checkPresence)
-router.get('/get-me', checkPresence)
-router.post('/change-me', checkPresence)
-router.delete('/remove-me', checkPresence)
+router.get('/me', getMe)
+router.put('/me', checkPresence)
+router.delete('me', checkPresence) // need password, written-passphrase, otp verification, token, and recupe mechanism with ttl of 3 months
 
 module.exports = router

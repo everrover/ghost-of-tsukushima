@@ -28,6 +28,11 @@ const generateUser = (sequelize) => {
       type: Sequelize.STRING(500),
       allowNull: false
     },
+    is_public: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
     is_active: {
       type: Sequelize.BOOLEAN,
       allowNull: false,

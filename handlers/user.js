@@ -1,4 +1,4 @@
-const {User} = require("../models/dbConnect")
+const {User, UserProfile} = require("../models/dbConnect")
 const {errorHandler} = require("../decorator/errorHandler")
 const bcrypt = require('bcryptjs')
 const CONFIGS = require('../configs/index');
@@ -42,6 +42,11 @@ const verifyUserRegistration = async (user_id) => {
 
   if(!user){ return message(false, "No user with user_id found") }
   user = await user.update({is_registered: true})
+
+  const userProfile = await (await UserProfile.findOne({where: {profile_id: user.profile_id}})).update({user_id: user.user_id})
+  if(!userProfile){
+    return message(false, "Unable to register user due to profile update failure!")
+  }
 
   if(!user){
     return message(false, "Unable to register user")
@@ -124,11 +129,14 @@ const deleteUser = async (user_id) => {
   }
 }
 
-const findOneUser = async ({user_id, username=null, email}) => {
+const findOneUser = async ({user_id, username, email, profile_id_reqd=false}) => {
   if(!(user_id || email || username)){
     return message(false, "user_id or email or username must be provided for find op")
   }
-  let user = await User.findOne({attributes: ["user_id", "username", "email", "role"], where: clean({user_id, username, email, is_active: true})})
+
+  const attributes = ["user_id", "username", "email", "role", "is_public"]
+  profile_id_reqd && attributes.push("profile_id")
+  let user = await User.findOne({attributes, where: clean({user_id, username, email, is_active: true})})
 
   if(!user){
     return message(false, "No user found")

@@ -72,14 +72,9 @@ const verifyUserAccount = async (req, res, next) => {
   LOG.info("[verifyUserAccount] Token validation result has been receieved!", validationResult)
   if(!validationResult || !validationResult.status){ return res.status(500).send(validationResult) }
 
-  const decToken = validationResult.body
-  let user = await findOneUser({
-    user_id: decToken.user_id, email: decToken.email
-  })
-  LOG.info("[verifyUserAccount] User found response rcv! User: ", user)
-  if(!user || !user.status){ return res.status(500).send(user) }
+  const {user_id, email} = validationResult.body
 
-  const userRegistrationResponse = await verifyUserRegistration(user.body.user_id)
+  const userRegistrationResponse = await verifyUserRegistration(user_id)
   LOG.info("[verifyUserAccount] User registration values updated!", userRegistrationResponse)
 
   if(userRegistrationResponse && userRegistrationResponse.status){
