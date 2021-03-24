@@ -7,7 +7,7 @@
  * 6. Fetch all users- admin
  */
 const LOG = require("../utils/log.js")
-const { checkIfPresent, findOneUser, findUserProfile, validateExistingUserSigninToken } = require("../handlers")
+const { checkIfPresent, findOneUser, findUserProfile, updateUserProfile, validateExistingUserSigninToken, updateUserWithMap } = require("../handlers")
 const { message } = require("../utils/messageGenerator")
 const { errorHandlerMiddleware } = require('../decorator/errorHandler')
 const clean = require("../utils/clean.js")
@@ -76,15 +76,37 @@ const deleteMe = async(req, res, next) => {
 }
 
 const updateMe = async(req, res, next) => {
-  const {username, email} = req.query
-  LOG.info("[checkPresence] Request received! Params: ", username, email)
-  const response = checkIfPresent(username, email)
-  LOG.info("[checkPresence] Sending response!", response)
+  const {username, phone, is_public, name, nationality, dob, gender} = req.body
+  const token = req.headers.authorization
+  LOG.info("[updateMe] Request received! Params: ", username, phone, is_public, name, nationality, dob, gender, "token")
 
-  if(response.status){
-    return res.status(200).send(response)
-  }else{
-    return res.status(500).send(response)
+  const requestingUser = token? (await validateExistingUserSigninToken(token)): null
+  if(token && (!requestingUser || !requestingUser.status)){
+    return res.status(403).send(requestingUser)
+  }
+  LOG.info("[updateMe] Fetched requesting user!!", requestingUser)
+  const user_id = requestingUser.body.user_id
+  const updatedUser = await updateUserWithMap(user_id, {username, phone, is_public})
+  if(!updatedUser || !updatedUser.status){
+    return res.status(400).send(updatedUser)
+  }
+  const profile_id = updatedUser.body.profile_id
+
+  LOG.info("[updateMe] Fetched updated user!!", updatedUser, user_id, profile_id)
+  const updatedUserProfile = await updateUserProfile(profile_id, {name, nationality, dob, gender})
+  if(!updatedUserProfile || !updatedUserProfile.status){
+    return res.status(400).send(updatedUserProfile)
+  }
+  LOG.info("[updateMe] Fetched updated user profile!!", updatedUserProfile)
+
+  if(updatedUser.status || updatedUserProfile.status){
+    const response = {
+      ...updatedUser.body,
+      ...updatedUserProfile.body
+    }
+    return res.status(200).send(message(true, "User updated!", clean(response)))
+  }else {
+    return res.status(500).send(message(false, "User not updated!"))
   }
 }
 
