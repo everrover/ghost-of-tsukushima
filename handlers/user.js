@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const CONFIGS = require('../configs/index');
 const {message} = require("../utils/messageGenerator");
 const clean = require("../utils/clean");
-const { use } = require("../mailer/transporter");
+const {Op} = require('sequelize');
 
 const createUser = async ({username, password, phone, email, profile_id}) => {
   const user = await User.create({
@@ -22,7 +22,7 @@ const createUser = async ({username, password, phone, email, profile_id}) => {
 }
 
 const checkIfPresent = async (username, email, phone) => {
-  const userWithEmail = await User.findOne({where: {email}})
+  const userWithEmail = email? await User.findOne({where: {email}}): null
   const userWithUsername = await User.findOne({where: {username}})
   const userWithPhone = phone? await User.findOne({where: {phone}}): null
   if(userWithPhone){
@@ -110,6 +110,45 @@ const updateUser = async (user_id, username, email, role) => {
   }
 }
 
+const updateUserWithMap = async (user_id, {username, is_public}) => {
+  if(!(user_id)){
+    return message(false, "User ID must be provided!")
+  }
+  const foundUserWithCredentials = username? await User.findOne({
+    where:{
+      username, is_registered: true, is_active: true,
+      [Op.not]: [{
+        user_id: [user_id]
+      }]
+    }
+  }): null
+  if(foundUserWithCredentials && foundUserWithCredentials.status){
+    return {status: false, ...foundUserWithCredentials}
+  }
+
+  let user = await User.findOne({where: {user_id, is_registered: true, is_active: true}})
+
+  if(!user){
+    return message(false, "No user with user_id found")
+  }
+  // return {status: false, ...user}
+
+  user = await user.update({username, is_public})
+
+  if(!user){
+    return message(false, "Unable to update user")
+  }else{
+    const response = user.dataValues
+    response.createdAt = null
+    response.password = null
+    response.updatedAt = null
+    response.role = null
+    response.is_active = null
+    response.is_registered = null
+    return message(true, "Updated user", response)
+  }
+}
+
 const deleteUser = async (user_id) => {
   if(!(user_id)){
     return message(false, "user_id must be provided for deletion")
@@ -166,6 +205,7 @@ module.exports = {
   changeUserPassword: errorHandler(changeUserPassword),
   deleteUser: errorHandler(deleteUser),
   updateUser: errorHandler(updateUser),
+  updateUserWithMap: errorHandler(updateUserWithMap),
   findOneUser: errorHandler(findOneUser),
   findAll: errorHandler(findAll),
 }

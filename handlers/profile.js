@@ -3,6 +3,7 @@ const {errorHandler} = require("../decorator/errorHandler")
 const bcrypt = require('bcryptjs')
 const CONFIGS = require('../configs/index');
 const {message} = require("../utils/messageGenerator");
+const clean = require("../utils/clean");
 
 const createUserProfile = async ({name, profile_photo, nationality, bg_photo, dob, gender, user_id}) => {
   const userProfile = await UserProfile.create({
@@ -17,7 +18,7 @@ const createUserProfile = async ({name, profile_photo, nationality, bg_photo, do
   }
 }
 
-const updateUserProfile = async ({name, profile_photo, nationality, bg_photo, dob, gender, user_id, profile_id}) => {
+const updateUserProfile = async (profile_id, {name, profile_photo, nationality, bg_photo, dob, gender, user_id}) => {
   if(!(profile_id)){
     return message(false, "profile_id must be present")
   }
@@ -27,15 +28,18 @@ const updateUserProfile = async ({name, profile_photo, nationality, bg_photo, do
     return message(false, "No user with profile_id found")
   }
 
-  userProfile = await userProfile.update({
+  userProfile = await userProfile.update(clean({
     name, profile_photo,
     nationality, bg_photo, dob, gender, user_id,
-  })
+  }))
 
   if(!userProfile){
     return message(false, "Unable to update user profile")
   }else{
-    return message(false, "Updated user profile", userProfile.dataValues)
+    const response = userProfile.dataValues
+    response.createdAt = null
+    response.updatedAt = null
+    return message(true, "Updated user profile", response)
   }
 }
 
