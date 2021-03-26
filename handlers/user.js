@@ -153,7 +153,7 @@ const updateUserWithMap = async (user_id, {username, is_public}) => {
   }
 }
 
-const deleteUser = async (user_id) => {
+const deleteUserHandler = async (user_id) => {
   if(!(user_id)){
     return message(false, "user_id must be provided for deletion")
   }
@@ -163,12 +163,17 @@ const deleteUser = async (user_id) => {
     return message(false, "No user with user_id found")
   }
 
-  user = await user.update({is_active: false})
+  user = await user.update({is_active: false, is_registered: false})
 
-  if(!user){
-    return message(false, "Unable to update user", user.dataValues)
+  if(user){
+    const response = user.dataValues
+    response.password = null
+    response.createdAt = null
+    response.updatedAt = null
+    response.profile_id = null
+    return message(true, "Deleted user", clean(response))
   }else{
-    return message(false, "Updated user")
+    return message(false, "Unable to delete user")
   }
 }
 
@@ -192,7 +197,7 @@ const findAll = async (is_active, is_registered, role) => {
   if(!(is_active || is_registered || role)){
     return message(false, "some field for search must be provided")
   }
-  const users = await User.findOne({attributes: {profile_id, user_id, username, email, role, is_registered, is_active}, where: {is_registered, role, is_active}})
+  const users = await User.findOne({attributes: {profile_id, user_id, username, email, role, is_registered, is_active}, where: clean({is_registered, role, is_active})})
 
   if(users.isEmpty()){
     return message(false, "No users found")
@@ -207,7 +212,7 @@ module.exports = {
   verifyUserRegistration: errorHandler(verifyUserRegistration),
   verifyUserPassword: errorHandler(verifyUserPassword),
   changeUserPassword: errorHandler(changeUserPassword),
-  deleteUser: errorHandler(deleteUser),
+  deleteUserHandler: errorHandler(deleteUserHandler),
   updateUser: errorHandler(updateUser),
   updateUserWithMap: errorHandler(updateUserWithMap),
   findOneUser: errorHandler(findOneUser),

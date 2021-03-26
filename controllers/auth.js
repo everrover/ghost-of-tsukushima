@@ -178,7 +178,7 @@ const changePassword = async (req, res, next) => {
   const changePasswordResponse = await changeUserPassword(validateTokenResponse.body.user_id, old_password, new_password)
   LOG.info('[changePassword] changed user password. Response: ', changePasswordResponse)
 
-  if( !changePasswordResponse || !changePasswordResponse.status ){ return res.status(500).send(changePasswordResponse) }
+  if( !changePasswordResponse || !changePasswordResponse.status ){ return res.status(400).send(changePasswordResponse) }
   return res.status(200).send(message(true, "User password changed!"))
 
 }

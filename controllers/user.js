@@ -7,7 +7,7 @@
  * 6. Fetch all users- admin
  */
 const LOG = require("../utils/log.js")
-const { checkIfPresent, findOneUser, findUserProfile, updateUserProfile, validateExistingUserSigninToken, updateUserWithMap } = require("../handlers")
+const { checkIfPresent, findOneUser, findUserProfile, updateUserProfile, validateExistingUserSigninToken, updateUserWithMap, deleteUserHandler, deleteUserToken } = require("../handlers")
 const { message } = require("../utils/messageGenerator")
 const { errorHandlerMiddleware } = require('../decorator/errorHandler')
 const clean = require("../utils/clean.js")
@@ -63,15 +63,29 @@ const getMe = async(req, res, next) => {
 }
 
 const deleteMe = async(req, res, next) => {
-  const {username, email} = req.query
-  LOG.info("[checkPresence] Request received! Params: ", username, email)
-  const response = checkIfPresent(username, email)
-  LOG.info("[checkPresence] Sending response!", response)
+  const {username, password} = req.body
+  const token = req.headers.authorization
+  LOG.info("[deleteMe] Request received! Params: ", username, "password-is-a-secret", "token-is-a-secret")
 
-  if(response.status){
+  const requestingUser = token? (await validateExistingUserSigninToken(token)): null
+  if(token && (!requestingUser || !requestingUser.status)){
+    return res.status(403).send(requestingUser)
+  }
+  LOG.info("[updateMe] Fetched requesting user!!", requestingUser)
+
+  const response = await deleteUserHandler(requestingUser.body.user_id)
+  LOG.info("[DeleteMe] user deletion response", response)
+  if(!response || !response.status){
+    return res.status(400).send(response)
+  }
+
+  const tokenDeleteResponse = await deleteUserToken(null, token)
+  if(!tokenDeleteResponse || !tokenDeleteResponse.status){
+    return res.status(400).send(tokenDeleteResponse)
+  }
+
+  if(response && response.status){
     return res.status(200).send(response)
-  }else{
-    return res.status(500).send(response)
   }
 }
 

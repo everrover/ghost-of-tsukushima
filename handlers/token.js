@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const {message} = require("../utils/messageGenerator");
 const { findOneUser } = require("./user");
 const configs = require("../configs/index");
+const clean = require("../utils/clean");
 
 const createUserToken = async (token, type, issued_time, ttl, expiration_time, user_id) => {
   const userToken = await UserToken.create({
@@ -72,11 +73,11 @@ const validateToken = async (token, type, to_delete=true) => {
   }
 }
 
-const deleteUserToken = async (token_id) => {
+const deleteUserToken = async (token_id, token) => {
   if(!(token_id)){
     return message(false, "The token_id must be present")
   }
-  let userToken = await UserToken.findOne({where: {token_id}})
+  let userToken = await UserToken.findOne({where: clean({token_id, token})})
 
   if(!userToken){
     return message(false, "No userToken with token_id found")

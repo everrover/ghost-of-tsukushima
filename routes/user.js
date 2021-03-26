@@ -1,7 +1,7 @@
 const express = require('express')
 
 const {
-  checkPresence, getMe, updateMe
+  checkPresence, getMe, updateMe, deleteMe
 } = require("../controllers/user.js")
 
 const router = express.Router()
@@ -17,6 +17,6 @@ router.delete('/me/profile-photo', checkPresence)
 router.get('/check-presence', checkPresence)
 router.get('/me', getMe)
 router.put('/me', updateMe)
-router.delete('me', checkPresence) // need password, written-passphrase, otp verification, token, and recupe mechanism with ttl of 3 months
+router.delete('/me', deleteMe) // need password, written-passphrase, otp verification, token, and recupe mechanism with ttl of 3 months
 
 module.exports = router
