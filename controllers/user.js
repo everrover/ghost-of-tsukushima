@@ -13,9 +13,9 @@ const { errorHandlerMiddleware } = require('../decorator/errorHandler')
 const clean = require("../utils/clean.js")
 
 const checkPresence = async(req, res, next) => {
-  const {username, email} = req.query
+  const {username, email, phone} = req.body
   LOG.info("[checkPresence] Request received! Params: ", username, email)
-  const response = checkIfPresent(username, email)
+  const response = await checkIfPresent(username, email, phone)
   LOG.info("[checkPresence] Sending response!", response)
 
   if(response.status){

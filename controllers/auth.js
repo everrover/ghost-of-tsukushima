@@ -169,10 +169,6 @@ const changePassword = async (req, res, next) => {
     return res.status(400).send(message(false, "who the fuck is he/she!!"))
   }
   const {old_password, new_password} = req.body
-  if(old_password === new_password){
-    LOG.info("[changePassword] Old and new password are same.")
-    return res.status(200).send(message(true, "Old and new password must be different"))
-  }
   LOG.info('[changePassword] req received. params: ', "Token-is-a-secret", "Old-and-new-passwords-are-secret-too") 
 
   const validateTokenResponse = await validateExistingUserSigninToken(token)
@@ -182,7 +178,7 @@ const changePassword = async (req, res, next) => {
   const changePasswordResponse = await changeUserPassword(validateTokenResponse.body.user_id, old_password, new_password)
   LOG.info('[changePassword] changed user password. Response: ', changePasswordResponse)
 
-  if( !validateTokenResponse || !validateTokenResponse.status ){ return res.status(500).send(changePasswordResponse) }
+  if( !changePasswordResponse || !changePasswordResponse.status ){ return res.status(500).send(changePasswordResponse) }
   return res.status(200).send(message(true, "User password changed!"))
 
 }

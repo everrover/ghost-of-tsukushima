@@ -78,6 +78,10 @@ const changeUserPassword = async (user_id, oldPassword, newPassword) => {
   const passwordValid = await bcrypt.compareSync(oldPassword, user.password)
   if(!passwordValid){ return message( false, "Old password invalid for user!!")}
 
+  if(oldPassword === newPassword){
+    return message(false, "Old and new password must be different")
+  }
+
   const userAfterUpd = await user.update({
     password: bcrypt.hashSync(newPassword, CONFIGS.SALT_ROUNDS_NUMBER)
   })
