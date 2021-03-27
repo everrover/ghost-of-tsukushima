@@ -1,6 +1,7 @@
 
 const LOG = require("../utils/log.js")
-const { validateExistingUserSigninToken, createFileHandler, 
+const path = require('path');
+const { validateExistingUserSigninToken, createFileHandler, getRequestedFile, 
   deleteFileHandler, updateFileHandler, findFileHandler } = require('../handlers/index.js')
 const { message } = require('../utils/messageGenerator')
 const { errorHandlerMiddleware } = require('../decorator/errorHandler')
@@ -18,21 +19,81 @@ const verifyFileUploader = async (req, res, next) => {
     if(!validationResponse || !validationResponse.status){
       return res.status(403).send(message(false, "User token is invalid"))
     }
-
-    if(req.type === 'POST'){
-      const {filename} = req.params
-      const file = await getFileWithFilename(filename)
-      LOG.info("[verify file uploader] File response", filename)
-      if (!file && !file.status){
-        return res.status(400).send(message(false, "The file for upload doesn't exist"))
-      } else if (validationResponse.body.user_id !== file.body.user_id){
-        return res.status(403).send(message(false, "The file owner must be same as uploader"))
-      }
-
-    }else{
-      next() // go to next op if file creation request is there
-    }
+    next() // go to next op if file creation request is there
+    
   } catch (e) {
+    return res.status(500).send(message(false, "some internal error occurred"))
+  }
+}
+
+const verifyFileOwner = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization
+    const filename = req.params.filename
+    // LOG.info(token)
+    if(!token){
+      return res.status(400).send(message(false, "User must be logged in to upload files | No available token."))
+    }
+    if(!filename){
+      return res.status(400).send(message(false, "Filename is obviously needed."))
+    }
+    const validationResponse = await validateExistingUserSigninToken(token)
+    LOG.info("[verify file owner] Validation response: ", validationResponse)
+    if(!validationResponse || !validationResponse.status){
+      return res.status(403).send(message(false, "User token is invalid"))
+    }
+
+    const fileRes = await findFileHandler(filename)
+    LOG.info("[verify file owner] Find file response: ", fileRes)
+    if(!fileRes || !fileRes.status){
+      return res.status(400).send(message(false, "Req file not found"))
+    }
+
+    if(fileRes.body.user_id !== validationResponse.body.user_id){
+      return res.status(403).send(message(false, "You aren't allowed to update the file"))
+    }
+    next() // go to next op if file creation request is there
+    
+  } catch (e) {
+    return res.status(500).send(message(false, "some internal error occurred"))
+  }
+}
+
+const verifyFileGetter = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization
+    const filename = req.params.filename
+
+    if(!token){
+      return res.status(400).send(message(false, "User must be logged in to upload files | No available token."))
+    }
+    if(!filename){
+      return res.status(400).send(message(false, "Filename is obviously needed."))
+    }
+    LOG.info("[get file validation] Request rcv: ", filename, "token-is-secret")
+
+    const validationResponse = await validateExistingUserSigninToken(token)
+    LOG.info("[get file validation] Validation response: ", validationResponse)
+    if(!validationResponse || !validationResponse.status){
+      return res.status(403).send(message(false, "User token is invalid"))
+    }
+
+    const fileRes = await findFileHandler(filename)
+    LOG.info("[get file validation] File get response: ", fileRes)
+    if(!fileRes || !fileRes.status){
+      return res.status(400).send(message(false, "File not found due to some reason"))
+    }
+
+    if(fileRes.body.access === "public" || fileRes.body.access === 'static' || fileRes.body.user_id === validationResponse.body.user_id){
+      LOG.info("getFileValidation | File access granted for", filename, "to user", validationResponse.body.user_id, "../media/files/"+filename)
+      return res.status(200).sendFile(filename, {root:path.join(__dirname, '/../media/files')})
+      // next() // when static wks
+    }else{
+      return res.status(403).send(message(false, "File is protected and can't be accessed by you!!"))
+    }
+
+  } catch (e) {
+    LOG.error("[getFileValidation] Error occurred: ", e)
     return res.status(500).send(message(false, "some internal error occurred"))
   }
 }
@@ -68,29 +129,44 @@ const createFile = async (req, res, next) => {
 }
 
 const updateFile = async (req, res, next) => {
-  const {token, filename, ext, access} = getFileReq(req)
-  LOG.info("[updateFile] req params rcv. ", filename, ext)
+  try {
+    const token = req.headers.authorization
+    const filename =  req.params.filename
+    const file = req.file
+    if(!token){
+      return res.status(400).send(message(false, "User must be logged in to upload files | No available token."))
+    }
+    if(!filename){
+      return res.status(400).send(message(false, "Filename is obviously needed."))
+    }
+    LOG.info("[update file] Request rcv: ", filename, "token-is-secret")
 
-  const findFileResponse = await findFileHandler(filename)
-  LOG.info("[updateFile] filename processed and findFileResponse rcv. ", findFileResponse)
-  if(!findFileResponse || !findFileResponse.status){
-    return res.status(500).send(findFileResponse)
-  }
+    const validationResponse = await validateExistingUserSigninToken(token)
+    LOG.info("[update file] Validation response: ", validationResponse)
+    if(!validationResponse || !validationResponse.status){
+      return res.status(403).send(message(false, "User token is invalid"))
+    }
 
-  const signinTokenValidationResponse = await validateExistingUserSigninToken(token)
-  LOG.info("[updateFile] token processed and signinTokenValidationResponse rcv. ", signinTokenValidationResponse)
-  if(!signinTokenValidationResponse || !signinTokenValidationResponse.status){
-    return res.status(500).send(signinTokenValidationResponse)
-  }else if(signinTokenValidationResponse.body.user_id !== findFileResponse.body.user_id){
-    return res.status(403).send(message(false, "User not allowed to update the static resource, User is not the owner of resource."))
-  }else{
-    const updateFileResponse = await updateFileHandler(filename, signinTokenValidationResponse.body.user_id, access, ext)
-    LOG.info("[updateFile] update file handler response rcv. ", updateFileResponse)
-    if(!updateFileResponse || !updateFileResponse.status){
-      return res.status.send(500).send(updateFileResponse)
-    } 
-    
-    return res.status(200).send(updateFileResponse)
+    const fileRes = await findFileHandler(filename)
+    LOG.info("[update file] File update response: ", fileRes)
+    if(!fileRes || !fileRes.status){
+      return res.status(400).send(message(false, "File not found due to some reason"))
+    }
+
+    if(fileRes.body.user_id === validationResponse.body.user_id){
+      const fileUpdateRes = await updateFileHandler(filename, user.user_id, file.filename, file.fieldname, file.mimetype, file.size, user.is_public? "public": "private")
+      if(!fileUpdateRes || !fileUpdateRes.status){
+        return res.status(500).send(message(false, "File not updated due to some reason"))
+      }
+      LOG.info("updateFile | File update res: ", fileUpdateRes)
+      return res.status(200).send(message(true, "File updated!!"))
+      // next() // when static wks
+    }else{
+      return res.status(403).send(message(false, "File is protected and can't be accessed by you!!"))
+    }
+  } catch (e) {
+    LOG.error("updateFile | error occurred: ", e)
+    return res.status(500).send(message(false, "Something went wrong"))
   }
 }
 
@@ -120,30 +196,20 @@ const getFile = async (req, res, next) => {
 }
 
 const deleteFile = async (req, res, next) => {
-  const {token, filename} = getFileReq(req)
-  LOG.info("[deleteFile] req params rcv. ", filename, token)
+  try {
+    const filename = req.params.filename
+    LOG.info("[deleteFile] req params rcv. ", filename, token)
 
-  const findFileResponse = await findFileHandler(filename)
-  LOG.info("[deleteFile] filename processed and findFileResponse rcv. ", findFileResponse)
-  if(!findFileResponse || !findFileResponse.status){
-    return res.status(500).send(findFileResponse)
-  }
-
-  const signinTokenValidationResponse = await validateExistingUserSigninToken(token)
-  LOG.info("[deleteFile] token processed and signinTokenValidationResponse rcv. ", signinTokenValidationResponse)
-  if(!signinTokenValidationResponse || !signinTokenValidationResponse.status){
-    return res.status(500).send(signinTokenValidationResponse)
-  }else if(signinTokenValidationResponse.body.user_id !== findFileResponse.body.user_id){
-    return res.status(403).send(message(false, "User not allowed to delete the static resource, User is not the owner of resource."))
-  }else{
-    const deleteFileResponse = await deleteFileHandler(filename, signinTokenValidationResponse.body.user_id)
-    LOG.info("[deleteFile] delete file handler response rcv. ", deleteFileResponse)
+    const deleteFileResponse = await deleteFileHandler(filename)
+    LOG.info("[deleteFile] filename processed and findFileResponse rcv. ", deleteFileResponse)
     if(!deleteFileResponse || !deleteFileResponse.status){
-      return res.status.send(500).send(deleteFileResponse)
-    } 
+      return res.status(500).send(deleteFileResponse)
+    }
     return res.status(200).send(deleteFileResponse)
+  } catch (e) {
+    LOG.error("updateFile | error occurred: ", e)
+    return res.status(500).send(message(false, "Something went wrong"))
   }
-
 }
 
 module.exports = {
@@ -151,5 +217,5 @@ module.exports = {
   updateFile: errorHandlerMiddleware(updateFile), 
   getFile: errorHandlerMiddleware(getFile), 
   deleteFile: errorHandlerMiddleware(deleteFile),
-  verifyFileUploader
+  verifyFileUploader, verifyFileGetter, verifyFileOwner
 }

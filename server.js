@@ -3,6 +3,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const dotenv = require('dotenv')
+const {verifyFileGetter} = require('./controllers/file.js');
 
 // set config prop file
 dotenv.config({
@@ -39,6 +40,8 @@ app.use(bodyParser.urlencoded({ extended: true })) // parse content-type - appli
 app.use("/api/v1/auth", auth)
 app.use("/api/v1/user", user)
 app.use("/api/v1/file", file)
+// app.use("/:filename", verifyFileGetter)
+// app.use("/", express.static("./media/files"))
 
 // start server
 const PORT = process.env.PORT || 5001;

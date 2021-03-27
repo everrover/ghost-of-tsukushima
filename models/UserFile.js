@@ -19,7 +19,8 @@ const generateUserFile = sequelize => UserFile = sequelize.define("tb_user_file"
   },
   file_name: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   file_type: {
     type: Sequelize.STRING,

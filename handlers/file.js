@@ -17,7 +17,7 @@ const findFileHandler = async (file_name) => {
   }
 }
 
-const deleteFileHandler = async (file_name, user_id) => {
+const deleteFileHandler = async (file_name) => {
   const userFile = await UserFile.findOne({
     attributes: ["user_id", "file_id", "file_name", "access"],
     where: { file_name, is_deleted: false }
@@ -46,12 +46,13 @@ const createFileHandler = async (user_id, file_name, file_type, file_mime, file_
   }
 }
 
-const updateFileHandler = async (file_name, user_id, access, ext) => {
-  const deleteFileResponse = await deleteFileHandler(file_name, user_id)
+const updateFileHandler = async (user_id, file_name, file_type, file_mime, file_size, access="public") => {
+  LOG.info("updateFileHandler | req rcv: ", user_id, file_name, file_type, file_mime, file_size, access)
+  const deleteFileResponse = await deleteFileHandler(file_name)
   if(!deleteFileResponse || !deleteFileResponse.status){
     return message(false, 'D: Unable to update user file')
   }
-  const createFileResponse = await createFileHandler(user_id, ext? ext: deleteFileResponse.body.file_type, access)
+  const createFileResponse = await createFileHandler(user_id, file_name, file_type, file_mime, file_size, access)
   if(!createFileResponse || !createFileResponse.status){
     return message(false, 'C: Unable to update user file')
   }else{

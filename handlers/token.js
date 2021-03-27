@@ -5,6 +5,7 @@ const {message} = require("../utils/messageGenerator");
 const { findOneUser } = require("./user");
 const configs = require("../configs/index");
 const clean = require("../utils/clean");
+const LOG = require("../utils/log");
 
 const createUserToken = async (token, type, issued_time, ttl, expiration_time, user_id) => {
   const userToken = await UserToken.create({
@@ -53,6 +54,10 @@ const createUserRegistrationToken = async ({user_id, email}) => {
 
 const validateToken = async (token, type, to_delete=true) => {
   const decodedToken = jwt.decode(token, {json: true})
+  if(!decodedToken){
+    LOG.info("Invalid token provided", decodedToken)
+    return message(false, "Token must be provided")
+  }
   let userToken = await UserToken.findOne({
     where: {
       user_id: decodedToken.user_id,
@@ -109,11 +114,11 @@ const validateExistingUserSigninToken = async (token) => {
     return message(false, "token must be provided")
   }
   const decToken = await validateToken(token, "signin", false) // validate
+  console.log(decToken)
   if(!decToken || !decToken.status){
     return decToken
   }
   const assUser = await findOneUser({user_id: decToken.body.user_id, email: decToken.body.email})
-  console.log(decToken.body)
   if(!assUser && !assUser.status){
     return message(false, "No userToken found")
   }else{

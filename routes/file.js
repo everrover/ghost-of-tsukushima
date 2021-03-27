@@ -1,4 +1,5 @@
 const express = require('express')
+const path = require('path');
 const multer = require('multer')
 const LOG = require('../utils/log.js')
 
@@ -29,16 +30,16 @@ const upload = multer({
 })
 
 const {
-  createFile, verifyFileUploader
+  createFile, verifyFileUploader, verifyFileGetter, updateFile, verifyFileOwner, deleteFile
 } = require("../controllers/file.js")
 
+// console.log(path.join(__dirname, '/../media/files'))
 const router = express.Router()
-const fileCreationSeq = [verifyFileUploader, upload.single("media"), createFile]
-router.put('/media', fileCreationSeq)
-// router.post('/media', createFile, upload.single("media_file"))
-// router.put('/media/:filename', updateFile, upload.single("media_file"))
-// router.delete('/media/:filename', deleteFile, upload.single("media_file"))
-// router.get('/media/:filename', getFile, express.static("../media/files"))
+router.put('/media', [verifyFileUploader, upload.single("media"), createFile])
+router.post('/media/:filename', [verifyFileOwner, upload.single("media"), updateFile])
+router.delete('/media/:filename', [verifyFileOwner, deleteFile])
+router.get('/media/:filename', verifyFileGetter)
+// router.get('/media', express.static(path.join(__dirname, '/../media/files')))
 
 module.exports = router
 
