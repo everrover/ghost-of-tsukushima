@@ -8,21 +8,30 @@ const generateUserFile = sequelize => UserFile = sequelize.define("tb_user_file"
     allowNull: false,
     unique: true
   },
+  is_deleted: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    default: false,
+  },
   user_id: {
     type: Sequelize.INTEGER,
-    unique: false
+    unique: true
   },
   file_name: {
     type: Sequelize.STRING,
     allowNull: false
   },
-  is_deleted: {
-    type: Sequelize.BOOLEAN,
-    allowNull: false
-  },
   file_type: {
     type: Sequelize.STRING,
     allowNull: true
+  },
+  file_mime: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  file_size: {
+    type: Sequelize.INTEGER,
+    allowNull: false
   },
   access: {
     type: Sequelize.STRING,

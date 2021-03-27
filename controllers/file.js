@@ -6,24 +6,64 @@ const { message } = require('../utils/messageGenerator')
 const { errorHandlerMiddleware } = require('../decorator/errorHandler')
 const clean = require("../utils/clean.js")
 
+const verifyFileUploader = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization
+    // LOG.info(token)
+    if(!token){
+      return res.status(400).send(message(false, "User must be logged in to upload files | No available token."))
+    }
+    const validationResponse = await validateExistingUserSigninToken(token)
+    LOG.info("[verify file uploader] Validation response: ", validationResponse)
+    if(!validationResponse || !validationResponse.status){
+      return res.status(403).send(message(false, "User token is invalid"))
+    }
+
+    if(req.type === 'POST'){
+      const {filename} = req.params
+      const file = await getFileWithFilename(filename)
+      LOG.info("[verify file uploader] File response", filename)
+      if (!file && !file.status){
+        return res.status(400).send(message(false, "The file for upload doesn't exist"))
+      } else if (validationResponse.body.user_id !== file.body.user_id){
+        return res.status(403).send(message(false, "The file owner must be same as uploader"))
+      }
+
+    }else{
+      next() // go to next op if file creation request is there
+    }
+  } catch (e) {
+    return res.status(500).send(message(false, "some internal error occurred"))
+  }
+}
+
 const getFileReq = (req) => {return clean({ext: req.query.ext, access: req.query.access, filename: req.params.filename, token: req.headers.authorization})}
 
 const createFile = async (req, res, next) => {
-  const {token, access, ext} = getFileReq(req)
-  LOG.info("[createFile] req params rcv. ", token, access)
+  try {
+    const token = req.headers.authorization
+    const file = req.file
+    if(!token){
+      return res.status(400).send(message(false, "User must be logged in to upload files | No available token."))
+    }
+    LOG.info("createFile | req rcv:", "token-is-a-secret", file)
 
-  const signinTokenValidationResponse = await validateExistingUserSigninToken(token)
-  LOG.info("[createFile] token processed and signinTokenValidationResponse rcv. ", signinTokenValidationResponse)
-  if(!signinTokenValidationResponse || !signinTokenValidationResponse.status){
-    return res.status(500).send(signinTokenValidationResponse)
-  }
+    const validationResponse = await validateExistingUserSigninToken(token)
+    LOG.info("[createFile] Validation response: ", validationResponse)
+    if(!validationResponse || !validationResponse.status){
+      return res.status(403).send(message(false, "User token is invalid"))
+    }
+    const user = validationResponse.body
 
-  const fileCreationResponse = await createFileHandler(signinTokenValidationResponse.body.user_id, ext, access)
-  LOG.info("[createFile] file params processed and fileCreationResponse rcv. ", fileCreationResponse)
-  if(!fileCreationResponse || !fileCreationResponse.status){
-    return res.status(500).send(fileCreationResponse)
-  }else{
-    return res.status(200).send(fileCreationResponse)
+    const createFileRes = await createFileHandler(user.user_id, file.filename, file.fieldname, file.mimetype, file.size, user.is_public? "public": "private")
+    LOG.info("createFile | Create file response: ", createFileRes)
+    if(!createFileRes || !createFileRes.status){
+      return res.status(500).send(message(false, "Unable to create the file in database!"))
+    }
+    return res.status(200).send(message(true, "File added into the system!", createFileRes))
+  } catch (e) {
+    LOG.error("createFile | error occurred: ", e)
+    return res.status(500).send(message(false, "Something went wrong"))    
   }
 }
 
@@ -110,5 +150,6 @@ module.exports = {
   createFile: errorHandlerMiddleware(createFile), 
   updateFile: errorHandlerMiddleware(updateFile), 
   getFile: errorHandlerMiddleware(getFile), 
-  deleteFile: errorHandlerMiddleware(deleteFile)
+  deleteFile: errorHandlerMiddleware(deleteFile),
+  verifyFileUploader
 }

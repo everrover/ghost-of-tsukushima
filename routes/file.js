@@ -1,25 +1,44 @@
 const express = require('express')
 const multer = require('multer')
+const LOG = require('../utils/log.js')
+
+const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg", "image/bmp"]
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {cb(null, "./media/files/")},
+  fileFilter: (req, file, cb) => {
+    LOG.info("[fileFilter] Attempt to add file with mime:", file.mimetype)
+    allowedTypes.forEach(type=>{
+      if(file.mimetype === type) cb(null, false)
+    })
+    return cb(null, true)
+  },
+  filename: (req, file, cb) => {
+    const pts = file.originalname.split(".")
+    const fileExt = pts[pts.length-1]
+    const filename = "file_"+file.fieldname+"_"+Date.now()+"."+fileExt
+    LOG.info("[filename] Adding file with name:", filename)
+    cb(null, filename)
+  }
+});
+
 
 const upload = multer({
-  dest: "../media/files/",
+  destination: "./media/files/",
+  storage
 })
 
-// const {
-//   uploadHandler, uploadsHandler, checkUserFileAccess,
-//   createFile, updateFile, getFile, deleteFile
-// } = require("../controllers/file.js")
+const {
+  createFile, verifyFileUploader
+} = require("../controllers/file.js")
 
 const router = express.Router()
-
-// router.post('/', createFile)
-// router.put('/:filename', updateFile)
-// router.get('/:filename', getFile)
-// router.delete('/:filename', deleteFile)
-
-// router.get("/media/files", checkUserFileAccess, express.static("media/files/"))
-// router.put("/media/upload", upload.single("media_file_"), uploadHandler)
-// router.put("/media/uploads", upload.single("media_files_"), uploadsHandler)
+const fileCreationSeq = [verifyFileUploader, upload.single("media"), createFile]
+router.put('/media', fileCreationSeq)
+// router.post('/media', createFile, upload.single("media_file"))
+// router.put('/media/:filename', updateFile, upload.single("media_file"))
+// router.delete('/media/:filename', deleteFile, upload.single("media_file"))
+// router.get('/media/:filename', getFile, express.static("../media/files"))
 
 module.exports = router
 

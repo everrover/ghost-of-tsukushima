@@ -74,9 +74,6 @@ const validateToken = async (token, type, to_delete=true) => {
 }
 
 const deleteUserToken = async (token_id, token) => {
-  if(!(token_id)){
-    return message(false, "The token_id must be present")
-  }
   let userToken = await UserToken.findOne({where: clean({token_id, token})})
 
   if(!userToken){

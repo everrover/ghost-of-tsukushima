@@ -2,6 +2,7 @@ const {UserFile} = require("../models/dbConnect")
 const {errorHandler} = require("../decorator/errorHandler")
 const {message} = require("../utils/messageGenerator");
 const { createNewFileName } = require("../utils/createName");
+const LOG = require("../utils/log");
 
 const findFileHandler = async (file_name) => {
   const userFile = await UserFile.findOne({
@@ -33,13 +34,11 @@ const deleteFileHandler = async (file_name, user_id) => {
   }
 }
 
-const createFileHandler = async (user_id, ext, access="public") => {
-  const file_name = createNewFileName(ext)
-  console.log(file_name)
+const createFileHandler = async (user_id, file_name, file_type, file_mime, file_size, access="public") => {
+  LOG.info("createFileHandler | req rcv: ", user_id, file_name, file_type, file_mime, file_size, access)
   const userFile = await UserFile.create({
-    user_id, file_name, is_deleted: false, access, file_type: (ext===""?null: ext)
+    is_deleted: false, user_id, file_name, file_mime, file_type, file_size, access
   })
-  console.log(userFile)
   if(!userFile){
     return message(false, "Unable to CREATE userFile")
   }else{
