@@ -38,7 +38,7 @@ const router = express.Router()
 router.put('/media', [verifyFileUploader, upload.single("media"), createFile])
 router.post('/media/:filename', [verifyFileOwner, upload.single("media"), updateFile])
 router.delete('/media/:filename', [verifyFileOwner, deleteFile])
-router.get('/media/:filename', verifyFileGetter)
+router.get('/media/:filename', [verifyFileUploader, verifyFileGetter])
 // router.get('/media', express.static(path.join(__dirname, '/../media/files')))
 
 module.exports = router
