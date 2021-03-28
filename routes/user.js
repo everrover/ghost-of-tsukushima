@@ -3,10 +3,11 @@ const express = require('express')
 const {
   createProfilePhoto, checkPresence, getMe,
   updateMe, deleteMe, createBG,
-  checkIfBGExists, checkIfProfileExists
+  deleteProfilePhoto,
+  checkIfBGExists, checkIfProfileExists, deleteBG
 } = require("../controllers/user.js")
 const {
-  verifyFileUploader, createFile, verifyFileOwner
+  verifyFileUploader, createFile, verifyFileOwner, deleteFile
 } = require("../controllers/file.js")
 const {
   upload
@@ -28,14 +29,30 @@ router.put('/me/profile-photo', [
   createProfilePhoto,
   createFile
 ])
-router.post('/me/bg', [
+// router.post('/me/bg', [
+//   verifyFileOwner,
+//   checkIfBGExists,
+//   upload.single("media"),
+// ])
+// router.post('/me/profile-photo', [
+//   verifyFileOwner,
+//   checkIfBGExists,
+//   upload.single("media"),
+// ])
+router.delete('/me/bg/:filename', [
   verifyFileOwner,
   checkIfBGExists,
-  upload.single("media"),
+  (req, res, next)=> {req.moreToDo = true; next()},
+  deleteBG,
+  deleteFile
 ])
-// router.post('/me/profile-photo', checkPresence)
-// router.delete('/me/bg', checkPresence)
-// router.delete('/me/profile-photo', checkPresence)
+router.delete('/me/profile-photo/:filename', [
+  verifyFileOwner,
+  checkIfProfileExists,
+  (req, res, next)=> {req.moreToDo = true; next()},
+  deleteProfilePhoto,
+  deleteFile
+])
 
 router.get('/check-presence', checkPresence)
 router.get('/me', getMe)

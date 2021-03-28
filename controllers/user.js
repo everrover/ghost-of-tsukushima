@@ -7,7 +7,7 @@
  * 6. Fetch all users- admin
  */
 const LOG = require("../utils/log.js")
-const { checkIfPresent, findOneUser, findUserProfile, updateUserProfile, validateExistingUserSigninToken, updateUserWithMap, deleteUserHandler, deleteUserToken } = require("../handlers")
+const { checkIfPresent, findOneUser, findUserProfile, updateUserProfile, validateExistingUserSigninToken, updateUserWithMap, deleteUserHandler, deleteUserToken, updateUserProfileNoClean } = require("../handlers")
 const { message } = require("../utils/messageGenerator")
 const { errorHandlerMiddleware } = require('../decorator/errorHandler')
 const clean = require("../utils/clean.js")
@@ -52,7 +52,7 @@ const getMe = async(req, res, next) => {
   if(requestedUser.body.is_public || (token && requestedUser.body.user_id === requestingUser.body.user_id)){
     const response = {
       ...requestedUser.body,
-      name: requestedUserProfile.body.name
+      ...requestedUserProfile.body
     }
     response["createdAt"] = null
     response["updatedAt"] = null
@@ -140,7 +140,7 @@ const checkIfBGExists = async (req, res, next) => {
     const foundUserProfile = await findUserProfile({profile_id})
     LOG.info("[checkIfBGExists] Found user profile: ", foundUserProfile)
     if(foundUserProfile && foundUserProfile.status && foundUserProfile.body.bg_photo){
-      if(req.type === 'PUT') {
+      if(req.method === 'PUT') {
         return res.status(400).send(message(false, "Profile BG already exists"))
       } else {
         req.user = foundUser.body
@@ -148,7 +148,7 @@ const checkIfBGExists = async (req, res, next) => {
         next() 
       }
     }else{
-      if(req.type === 'POST') {
+      if(req.method === 'POST' || req.method === 'DELETE') {
         return res.status(400).send(message(false, "Profile BG doesn't exists"))
       } else {
         req.user = foundUser.body
@@ -198,7 +198,7 @@ const checkIfProfileExists = async (req, res, next) => {
     const foundUserProfile = await findUserProfile({profile_id})
     LOG.info("[checkIfProfileExists] Found user profile: ", foundUserProfile)
     if(foundUserProfile && foundUserProfile.status && foundUserProfile.body.profile_photo){
-      if(req.type === 'PUT') {
+      if(req.method === 'PUT') {
         return res.status(400).send(message(false, "Profile Photo already exists"))
       } else {
         req.user = foundUser.body
@@ -206,7 +206,7 @@ const checkIfProfileExists = async (req, res, next) => {
         next() 
       }
     }else{
-      if(req.type === 'POST') {
+      if(req.method === 'POST' || req.method === 'DELETE') {
         return res.status(400).send(message(false, "Profile Photo doesn't exists"))
       } else {
         req.user = foundUser.body
@@ -242,11 +242,53 @@ const createProfilePhoto = async(req, res, next) => {
 }
 
 
+const deleteBG = async(req, res, next) => {
+  try {
+    const bg_photo = req.reqFile.file_name
+    const profile_id = req.user.profile_id
+    LOG.info("[deleteProfileBG] Request received! Params: ", bg_photo, profile_id)
+    
+    const updatedUserProfile = await updateUserProfileNoClean(profile_id, {bg_photo: null})
+    LOG.info("[deleteProfileBG] Fetched updated user profile!!", updatedUserProfile)
+    if(!updatedUserProfile || !updatedUserProfile.status){
+      return res.status(400).send(updatedUserProfile)
+    }
+    LOG.info("[deleteProfileBG] BG deleted in user profile!!")
+    if(req.moreToDo) { next() }
+    else { return res.status(200).send(message(true, 'Profile BG was deleted for '+req.user.user_id)) }
+  } catch (e) {
+    LOG.error("[deleteProfileBG] BG update error: ", e)
+  }
+}
+
+
+const deleteProfilePhoto = async(req, res, next) => {
+  try {
+    const profile_photo = req.reqFile.file_name
+    const profile_id = req.user.profile_id
+    LOG.info("[deleteProfileBG] Request received! Params: ", profile_photo, profile_id)
+    
+    const updatedUserProfile = await updateUserProfileNoClean(profile_id, {profile_photo: null})
+    LOG.info("[deleteProfileBG] Fetched updated user profile!!", updatedUserProfile)
+    if(!updatedUserProfile || !updatedUserProfile.status){
+      return res.status(400).send(updatedUserProfile)
+    }
+    LOG.info("[deleteProfileBG] BG deleted in user profile!!")
+    if(req.moreToDo) { next() }
+    else { return res.status(200).send(message(true, 'Profile BG was deleted for '+req.user.user_id)) }
+  } catch (e) {
+    LOG.error("[deleteProfileBG] BG update error: ", e)
+  }
+}
+
+
 
 module.exports = {
   getMe: errorHandlerMiddleware(getMe),
   deleteMe: errorHandlerMiddleware(deleteMe),
   updateMe: errorHandlerMiddleware(updateMe),
   checkPresence: errorHandlerMiddleware(checkPresence),
-  createBG, checkIfBGExists, checkIfProfileExists, createProfilePhoto
+  createBG, checkIfBGExists, checkIfProfileExists,
+  createProfilePhoto, deleteBG, deleteProfilePhoto
+
 }
