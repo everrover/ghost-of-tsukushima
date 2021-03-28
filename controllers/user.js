@@ -140,10 +140,22 @@ const checkIfBGExists = async (req, res, next) => {
     const foundUserProfile = await findUserProfile({profile_id})
     LOG.info("[checkIfBGExists] Found user profile: ", foundUserProfile)
     if(foundUserProfile && foundUserProfile.status && foundUserProfile.body.bg_photo){
-      return res.status(400).send(message(false, "Profile BG already exists"))
+      if(req.type === 'PUT') {
+        return res.status(400).send(message(false, "Profile BG already exists"))
+      } else {
+        req.user = foundUser.body
+        req.changeProfilePhoto = true
+        next() 
+      }
+    }else{
+      if(req.type === 'POST') {
+        return res.status(400).send(message(false, "Profile BG doesn't exists"))
+      } else {
+        req.user = foundUser.body
+        req.changeProfilePhoto = true
+        next() 
+      }
     }
-    req.user = foundUser.body
-    next()
   } catch (e) {
     LOG.error("[checkIfBGExists] BG update error: ", e)
     return res.status(500).send(message(false, "Internal error occurred"))
@@ -186,10 +198,22 @@ const checkIfProfileExists = async (req, res, next) => {
     const foundUserProfile = await findUserProfile({profile_id})
     LOG.info("[checkIfProfileExists] Found user profile: ", foundUserProfile)
     if(foundUserProfile && foundUserProfile.status && foundUserProfile.body.profile_photo){
-      return res.status(400).send(message(false, "Profile BG already exists"))
+      if(req.type === 'PUT') {
+        return res.status(400).send(message(false, "Profile Photo already exists"))
+      } else {
+        req.user = foundUser.body
+        req.changeProfilePhoto = true
+        next() 
+      }
+    }else{
+      if(req.type === 'POST') {
+        return res.status(400).send(message(false, "Profile Photo doesn't exists"))
+      } else {
+        req.user = foundUser.body
+        req.changeProfilePhoto = true
+        next() 
+      }
     }
-    req.user = foundUser.body
-    next()
   } catch (e) {
     LOG.error("[checkIfProfileExists] BG update error: ", e)
     return res.status(500).send(message(false, "Internal error occurred"))

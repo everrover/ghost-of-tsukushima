@@ -6,7 +6,7 @@ const {
   checkIfBGExists, checkIfProfileExists
 } = require("../controllers/user.js")
 const {
-  verifyFileUploader, createFile
+  verifyFileUploader, createFile, verifyFileOwner
 } = require("../controllers/file.js")
 const {
   upload
@@ -28,7 +28,11 @@ router.put('/me/profile-photo', [
   createProfilePhoto,
   createFile
 ])
-// router.pcreateProfilePhotoost('/me/bg', checkPresence)
+router.post('/me/bg', [
+  verifyFileOwner,
+  checkIfBGExists,
+  upload.single("media"),
+])
 // router.post('/me/profile-photo', checkPresence)
 // router.delete('/me/bg', checkPresence)
 // router.delete('/me/profile-photo', checkPresence)
