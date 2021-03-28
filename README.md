@@ -10,4 +10,3 @@ A reusable authentication module
 
 ### Action
 - Added profile API's
-- 
