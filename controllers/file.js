@@ -103,20 +103,20 @@ const createFile = async (req, res, next) => {
     // console.log(req)
     const user = req.user
     const file = req.file
+    LOG.info("createFile | req rcv:", user, file)    
     if(!user){
       return res.status(403).send(message(false, "User wasn;t verified and isn;t available!"))
     }
     if(!file){
       return res.status(500).send(message(false, "File wasn't created!"))
     }
-    LOG.info("createFile | req rcv:", user, file)
 
-    const createFileRes = await createFileHandler(user.user_id, file.filename, file.fieldname, file.mimetype, file.size, user.is_public? "public": "private")
+    const createFileRes = await createFileHandler(user.user_id, file.filename, file.fieldname, file.mimetype, file.size, file.access? file.access: user.is_public? "public": "private")
     LOG.info("createFile | Create file response: ", createFileRes)
     if(!createFileRes || !createFileRes.status){
       return res.status(500).send(message(false, "Unable to create the file in database!"))
     }
-    return res.status(200).send(message(true, "File added into the system!", createFileRes))
+    return res.status(200).send(message(true, "File added into the system!", createFileRes.body))
   } catch (e) {
     LOG.error("createFile | error occurred: ", e)
     return res.status(500).send(message(false, "Something went wrong"))    

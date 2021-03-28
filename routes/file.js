@@ -41,7 +41,7 @@ router.delete('/media/:filename', [verifyFileOwner, deleteFile])
 router.get('/media/:filename', [verifyFileUploader, verifyFileGetter])
 // router.get('/media', express.static(path.join(__dirname, '/../media/files')))
 
-module.exports = router
+module.exports = {router, upload}
 
 /**
  * Downloads handled using middleware fn getFileInfo

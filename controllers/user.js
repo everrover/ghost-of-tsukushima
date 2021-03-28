@@ -124,10 +124,105 @@ const updateMe = async(req, res, next) => {
   }
 }
 
+const checkIfBGExists = async (req, res, next) => {
+  try {
+    
+    const user = req.user
+    LOG.info("[checkIfBGExists] Request received! Params: ", user)
+    const user_id = user.user_id
+    const foundUser = await findOneUser({user_id, profile_id_reqd: true})
+    LOG.info("[checkIfBGExists] Found user: ", foundUser)
+    if(!foundUser || !foundUser.status){
+      return res.status(400).send(foundUser)
+    }
+    const profile_id = foundUser.body.profile_id
+
+    const foundUserProfile = await findUserProfile({profile_id})
+    LOG.info("[checkIfBGExists] Found user profile: ", foundUserProfile)
+    if(foundUserProfile && foundUserProfile.status && foundUserProfile.body.bg_photo){
+      return res.status(400).send(message(false, "Profile BG already exists"))
+    }
+    req.user = foundUser.body
+    next()
+  } catch (e) {
+    LOG.error("[checkIfBGExists] BG update error: ", e)
+    return res.status(500).send(message(false, "Internal error occurred"))
+  }
+}
+
+const createBG = async(req, res, next) => {
+  try {
+    const bg_photo = req.file.filename
+    const profile_id = req.user.profile_id
+    LOG.info("[createBG] Request received! Params: ", req.file, req.user)
+    
+    const updatedUserProfile = await updateUserProfile(profile_id, {bg_photo})
+    LOG.info("[createBG] Fetched updated user profile!!", updatedUserProfile)
+    if(!updatedUserProfile || !updatedUserProfile.status){
+      return res.status(400).send(updatedUserProfile)
+    }
+    LOG.info("[createBG] BG updated in user profile!!")
+    req.file = {...req.file, access: "static"}
+    next()
+    
+  } catch (e) {
+    LOG.error("[createBG] BG update error: ", e)
+  }
+}
+
+const checkIfProfileExists = async (req, res, next) => {
+  try {
+    
+    const user = req.user
+    LOG.info("[checkIfProfileExists] Request received! Params: ", user)
+    const user_id = user.user_id
+    const foundUser = await findOneUser({user_id, profile_id_reqd: true})
+    LOG.info("[checkIfProfileExists] Found user: ", foundUser)
+    if(!foundUser || !foundUser.status){
+      return res.status(400).send(foundUser)
+    }
+    const profile_id = foundUser.body.profile_id
+
+    const foundUserProfile = await findUserProfile({profile_id})
+    LOG.info("[checkIfProfileExists] Found user profile: ", foundUserProfile)
+    if(foundUserProfile && foundUserProfile.status && foundUserProfile.body.profile_photo){
+      return res.status(400).send(message(false, "Profile BG already exists"))
+    }
+    req.user = foundUser.body
+    next()
+  } catch (e) {
+    LOG.error("[checkIfProfileExists] BG update error: ", e)
+    return res.status(500).send(message(false, "Internal error occurred"))
+  }
+}
+
+
+const createProfilePhoto = async(req, res, next) => {
+  try {
+    const profile_photo = req.file.filename
+    const profile_id = req.user.profile_id
+    LOG.info("[createProfilePhoto] Request received! Params: ", req.file, req.user)
+    
+    const updatedUserProfile = await updateUserProfile(profile_id, {profile_photo})
+    LOG.info("[createProfilePhoto] Fetched updated user profile!!", updatedUserProfile)
+    if(!updatedUserProfile || !updatedUserProfile.status){
+      return res.status(400).send(updatedUserProfile)
+    }
+    LOG.info("[createProfilePhoto] BG updated in user profile!!")
+    req.file = {...req.file, access: "static"}
+    next()
+    
+  } catch (e) {
+    LOG.error("[createProfilePhoto] BG update error: ", e)
+  }
+}
+
+
 
 module.exports = {
   getMe: errorHandlerMiddleware(getMe),
   deleteMe: errorHandlerMiddleware(deleteMe),
   updateMe: errorHandlerMiddleware(updateMe),
   checkPresence: errorHandlerMiddleware(checkPresence),
+  createBG, checkIfBGExists, checkIfProfileExists, createProfilePhoto
 }

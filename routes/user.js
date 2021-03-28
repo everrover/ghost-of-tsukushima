@@ -1,18 +1,37 @@
 const express = require('express')
 
 const {
-  checkPresence, getMe, updateMe, deleteMe
+  createProfilePhoto, checkPresence, getMe,
+  updateMe, deleteMe, createBG,
+  checkIfBGExists, checkIfProfileExists
 } = require("../controllers/user.js")
+const {
+  verifyFileUploader, createFile
+} = require("../controllers/file.js")
+const {
+  upload
+} = require("./file")
 
 const router = express.Router()
 
-
-router.get('/me/bg', checkPresence)
-router.get('/me/profile-photo', checkPresence)
-router.post('/me/bg', checkPresence)
-router.post('/me/profile-photo', checkPresence)
-router.delete('/me/bg', checkPresence)
-router.delete('/me/profile-photo', checkPresence)
+router.put('/me/bg', [
+  verifyFileUploader, 
+  checkIfBGExists,
+  upload.single("media"),
+  createBG,
+  createFile
+])
+router.put('/me/profile-photo', [
+  verifyFileUploader, 
+  checkIfProfileExists,
+  upload.single("media"),
+  createProfilePhoto,
+  createFile
+])
+// router.pcreateProfilePhotoost('/me/bg', checkPresence)
+// router.post('/me/profile-photo', checkPresence)
+// router.delete('/me/bg', checkPresence)
+// router.delete('/me/profile-photo', checkPresence)
 
 router.get('/check-presence', checkPresence)
 router.get('/me', getMe)

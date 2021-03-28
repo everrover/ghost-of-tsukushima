@@ -3,7 +3,6 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const dotenv = require('dotenv')
-const {verifyFileGetter} = require('./controllers/file.js');
 
 // set config prop file
 dotenv.config({
@@ -16,7 +15,7 @@ const DB = require("./models/dbConnect")
 
 // import routes
 const auth = require("./routes/auth")
-const file = require("./routes/file")
+const file = require("./routes/file").router
 const user = require("./routes/user")
 
 // Initialize DB
