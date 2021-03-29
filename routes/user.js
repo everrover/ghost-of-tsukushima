@@ -29,16 +29,26 @@ router.put('/me/profile-photo', [
   createProfilePhoto,
   createFile
 ])
-// router.post('/me/bg', [
-//   verifyFileOwner,
-//   checkIfBGExists,
-//   upload.single("media"),
-// ])
-// router.post('/me/profile-photo', [
-//   verifyFileOwner,
-//   checkIfBGExists,
-//   upload.single("media"),
-// ])
+router.post('/me/bg/:filename', [
+  verifyFileOwner,
+  checkIfBGExists,
+  upload.single("media"),
+  (req, res, next)=> {req.moreToDo = true; req.isUpdate = true; next()},
+  deleteBG,
+  deleteFile,
+  createBG,
+  createFile
+])
+router.post('/me/profile-photo/:filename', [
+  verifyFileOwner,
+  checkIfProfileExists,
+  upload.single("media"),
+  (req, res, next)=> {req.moreToDo = true; req.isUpdate = true; next()},
+  deleteProfilePhoto,
+  deleteFile,
+  createProfilePhoto,
+  createFile
+])
 router.delete('/me/bg/:filename', [
   verifyFileOwner,
   checkIfBGExists,

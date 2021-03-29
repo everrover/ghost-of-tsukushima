@@ -167,8 +167,11 @@ const deleteFile = async (req, res, next) => {
     LOG.info("[deleteFile] filename processed and findFileResponse rcv. ", deleteFileResponse)
     if(!deleteFileResponse || !deleteFileResponse.status){
       return res.status(500).send(deleteFileResponse)
+    }else if(req.isUpdate){
+      next()
+    }else{
+      return res.status(200).send(deleteFileResponse)
     }
-    return res.status(200).send(deleteFileResponse)
   } catch (e) {
     LOG.error("deleteFile | error occurred: ", e)
     return res.status(500).send(message(false, "Something went wrong"))
