@@ -1,9 +1,8 @@
 # ghost-of-tsukushima
 
-A reusable authentication module
+A reusable authentication module and for reference
 
-
-
+**Use case**: Authorize access to profile information and files.
 
 ## List of contributers :
 
@@ -12,20 +11,37 @@ A reusable authentication module
 
 ## API's
 
-### Files
+The end-points are named intuitively. And respectively present in their route files. There are three kinds of routes.
 
-#### /api/v1/auth/file/media/:filename
+- **Files** - Handles file handling - ```/api/v1/files```
+- **Profile** - Handles user profile access information - ```/api/v1/user```
+- **Profile** - Handles user authentication and authorization - ```/api/v1/auth```
 
-#### /api/v1/auth/user/create-user
+## Getting started steps
 
+Install dependencies
+```shell
+npm install
+```
 
-#### /api/v1/auth/user/verify-user
-#### /api/v1/auth/user/signin
-#### /api/v1/auth/user/signout
-#### /api/v1/auth/user/get-me
-#### /api/v1/auth/user/get-role
-#### /api/v1/auth/user/change-password
+Run server command
+```shell
+npm run dev
+```
 
-### Profile
+Import API's into postman using collection - file : ```GoT.postman_collection.json```
 
-### Authentication
+Import API env variables into postman using environment - file : ```GoT.postman_environment.json```
+
+---
+
+If you have some enhancements, bug corrections or any feasible changes in mind, do make a pull request.
+
+Some future enhancements that I have in mind are listed below. Something catch your eye? Contact me for details.
+
+## Enhancements
+
+- Password recovery feature
+- CRON jobs for weeding out deleted accounts, tokens, profiles and files.
+- UI to intuitively handle the API's as they should be
+
