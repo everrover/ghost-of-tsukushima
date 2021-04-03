@@ -1,0 +1,1033 @@
+{
+	"info": {
+		"_postman_id": "5411ac1d-38cf-4885-892c-9039270be776",
+		"name": "GoT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "AUTH",
+			"item": [
+				{
+					"name": "IB_AUTH_VERIFICATION_LINK",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = JSON.parse(responseBody);",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_AUTH_TOKEN\", json.body.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{USER_SIGNUP_TOKEN}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/auth/user/verify-user",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								"verify-user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_AUTH_SIGNIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = JSON.parse(responseBody);",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_AUTH_TOKEN\", json.body.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"cb1977\",\n    \"password\": \"{{USER_PASSWORD}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/auth/user/signin",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_AUTH_SIGNUP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = JSON.parse(responseBody);",
+									"const requestBodyJSON = JSON.parse(pm.request.body);",
+									"",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_SIGNUP_TOKEN\", json.body.token);",
+									"    pm.environment.set(\"USER_PASSWORD\", requestBodyJSON.password)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"cb1972\",\n    \"password\": \"passwordOfUser123\",\n    \"email\": \"deyol.abhishek@gmail.com\",\n    \"name\": \"Abhishek Deyol\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/auth/user/create-user",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								"create-user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_AUTH_SIGNOUT",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{USER_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/auth/user/signout",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								"signout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_AUTH_ME",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{USER_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{USER_AUTH_TOKEN}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/auth/user/get-me",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								"get-me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_AUTH_CHANGE_PASSWORD",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = JSON.parse(responseBody);",
+									"const requestBodyJSON = JSON.parse(pm.request.body);",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_PASSWORD\", requestBodyJSON.new_password);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{USER_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"new_password\": \"like122((**))\",\n    \"old_password\": \"{{USER_PASSWORD}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/auth/user/change-password",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_AUTH_GET_ROLE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{USER_AUTH_TOKEN}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/auth/user/get-role",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								"get-role"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "FILE_ACCESS",
+			"item": [
+				{
+					"name": "IB_FILE_CREATE",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "media",
+									"type": "file",
+									"src": "/home/everrover/Downloads/Images/wallpaperflare.com_wallpaper (1)22.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/file/media",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"file",
+								"media"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_FILE_UPDATE",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "media",
+									"type": "file",
+									"src": "/home/everrover/Downloads/Images/wp2306843-shelter-wallpapers.png"
+								},
+								{
+									"key": "media",
+									"type": "file",
+									"src": "/home/everrover/Downloads/Images/wallpaperflare.com_wallpaper (1)22.jpg",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/file/media/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"file",
+								"media",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "file_media_1616869972106.jpg"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_FILE_DELETE",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{USER_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/file/media/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"file",
+								"media",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "file_media_1616859494448.jpg"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_FILE_GET",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/file/media/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"file",
+								"media",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "file_media_1616870028925.png"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_FILE_GET_PUBLIC",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/file/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"file",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_FILE_GET ROOT",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"file_media_1616835310854.jpg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5001/:filename",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
+							"path": [
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "file_media_1616835310854.jpg"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "USER_INFO",
+			"item": [
+				{
+					"name": "GET_USER_INFO",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = JSON.parse(responseBody);",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_PROFILE_BG\", json.body.bg_photo);",
+									"    pm.environment.set(\"USER_PROFILE_PHOTO\", json.body.profile_photo);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{USER_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"cb1977\"\n}   ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/me",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CHECK_PRESENCE",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"zealot97\",\n    \"email\": \"deyol.abhishek@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/check-presence",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"check-presence"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE_USER",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = JSON.parse(responseBody);",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_AUTH_TOKEN\", \"\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{USER_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/me",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE_USER",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{USER_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Dalal Boy\",\n    \"is_public\": true,\n    \"gender\": \"unknown\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/me",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE_PROFILE_BG",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = JSON.parse(responseBody);",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_PROFILE_BG\", json.body.file_name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{USER_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "media",
+									"type": "file",
+									"src": "/home/everrover/Downloads/Images/wallpaperflare.com_wallpaper.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/me/bg",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"me",
+								"bg"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE_PROFILE_BG",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/me/bg/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"me",
+								"bg",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "{{USER_PROFILE_BG}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE_PROFILE_PHOTO",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/me/profile-photo/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"me",
+								"profile-photo",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "{{USER_PROFILE_PHOTO}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE_PROFILE_PHOTO",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = JSON.parse(responseBody);",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_PROFILE_PHOTO\", json.body.file_name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "media",
+									"type": "file",
+									"src": "/home/everrover/Downloads/Images/wallpaperflare.com_wallpaper.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/me/profile-photo",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"me",
+								"profile-photo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE_PROFILE_PHOTO",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = JSON.parse(responseBody);",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_PROFILE_PHOTO\", json.body.file_name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "media",
+									"type": "file",
+									"src": "/home/everrover/Downloads/Images/pexels-pixabay-207662.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/me/profile-photo/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"me",
+								"profile-photo",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "{{USER_PROFILE_PHOTO}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE_PROFILE_BG",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = JSON.parse(responseBody);",
+									"if(json && json.status){",
+									"    pm.environment.set(\"USER_PROFILE_BG\", json.body.file_name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "media",
+									"type": "file",
+									"src": "/home/everrover/Downloads/Images/pexels-pixabay-207662.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/user/me/bg/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"user",
+								"me",
+								"bg",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "{{USER_PROFILE_BG}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_FILE_GET_PROFILE",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{USER_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/file/media/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"file",
+								"media",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "{{USER_PROFILE_PHOTO}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IB_FILE_GET_BG",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{USER_AUTH_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{URL_ICED_BEER}}/file/media/:filename",
+							"host": [
+								"{{URL_ICED_BEER}}"
+							],
+							"path": [
+								"file",
+								"media",
+								":filename"
+							],
+							"variable": [
+								{
+									"key": "filename",
+									"value": "{{USER_PROFILE_BG}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
