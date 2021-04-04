@@ -44,4 +44,7 @@ Some future enhancements that I have in mind are listed below. Something catch y
 - Password recovery feature
 - CRON jobs for weeding out deleted accounts, tokens, profiles and files.
 - UI to intuitively handle the API's as they should be
+- Profile uploads encryption, compression and setup
+- Configuration setup to be done properly
+- Making mails a bit beautiful
 
